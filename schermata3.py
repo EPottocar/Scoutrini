@@ -1,4 +1,5 @@
 import sys
+import json
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QTableWidget, QTableWidgetItem, QHeaderView,
@@ -11,7 +12,7 @@ from escpos.printer import Usb
 Customer_Name = None
 
 class ConfirmDialog(QDialog):
-    def __init__(self, item_name, item_price):
+    def __init__(self, item_name, item_price, item_descript):
         super().__init__()
         self.setWindowTitle("Conferma")
         self.setGeometry(300, 200, 400, 300)
@@ -38,7 +39,7 @@ class ConfirmDialog(QDialog):
 
         self.description_field = QTextEdit()
         self.description_field.setReadOnly(True)
-        self.description_field.setText(f"Descrizione per {item_name}.")  # Placeholder
+        self.description_field.setText(f"{item_descript}.")  # Placeholder
         layout.addWidget(self.description_field)
 
         # Notes section
@@ -129,7 +130,27 @@ class RestaurantApp(QMainWindow):
         self.setWindowTitle("Restaurant Order and Receipt App")
         self.setGeometry(100, 100, 900, 600)
 
+        self.menu_items = []
+        self.beverage_items = []
+
+        self.load_menu_data()
         self.initUI()
+
+    def load_menu_data(self):
+        try:
+            with open("menu.json", "r") as file:
+                menu_data = json.load(file)
+
+            self.menu_items = [
+                (item["nome"], f"€{item['prezzo']:.2f}", item["descrizione"])
+                for item in menu_data.get("cibo", [])
+            ]
+            self.beverage_items = [
+                (item["nome"], f"€{item['prezzo']:.2f}")
+                for item in menu_data.get("bevanda", [])
+            ]
+        except Exception as e:
+            print(f"Errore durante il caricamento di menu.json: {e}")
 
     def initUI(self):
         # Main container
@@ -169,15 +190,7 @@ class RestaurantApp(QMainWindow):
         self.menu_table.verticalHeader().setVisible(False)
         self.menu_table.setEditTriggers(QTableWidget.NoEditTriggers)
 
-        menu_items = [
-            ("Margherita Pizza", "$10"),
-            ("Pasta Carbonara", "$12"),
-            ("Caesar Salad", "$8"),
-            ("Grilled Salmon", "$15"),
-            ("Tiramisu", "$6"),
-        ]
-
-        for row, (item, price) in enumerate(menu_items):
+        for row, (item, price, descript) in enumerate(self.menu_items):
             self.menu_table.setItem(row, 0, QTableWidgetItem(item))
             self.menu_table.setItem(row, 1, QTableWidgetItem(price))
 
@@ -200,15 +213,7 @@ class RestaurantApp(QMainWindow):
         self.beverages_table.verticalHeader().setVisible(False)
         self.beverages_table.setEditTriggers(QTableWidget.NoEditTriggers)
 
-        beverage_items = [
-            ("Coca Cola", "$3"),
-            ("Orange Juice", "$4"),
-            ("Water", "$2"),
-            ("Red Wine", "$5"),
-            ("Coffee", "$3"),
-        ]
-
-        for row, (item, price) in enumerate(beverage_items):
+        for row, (item, price) in enumerate(self.beverage_items):
             self.beverages_table.setItem(row, 0, QTableWidgetItem(item))
             self.beverages_table.setItem(row, 1, QTableWidgetItem(price))
 
@@ -229,7 +234,7 @@ class RestaurantApp(QMainWindow):
         total_layout = QHBoxLayout()
         total_label = QLabel("Totale:")
         total_label.setFont(QFont("Arial", 14))
-        self.total_display = QLineEdit("$0")
+        self.total_display = QLineEdit("€0")
         self.total_display.setFont(QFont("Arial", 14))
         self.total_display.setReadOnly(True)
         total_layout.addWidget(total_label)
@@ -265,11 +270,19 @@ class RestaurantApp(QMainWindow):
         self.menu_table.cellDoubleClicked.connect(self.show_confirm_dialog)
         self.beverages_table.cellDoubleClicked.connect(self.add_beverage_to_order)
 
-    def show_confirm_dialog(self, row, column):
+#mi serve per ritornare la descrizione nel confirm dialog
+    def get_item_description(self, item_name):
+        # Controlla nella lista degli item cibo
+        for nome, prezzo, descrizione in self.menu_items:
+            if nome.lower() == item_name.lower():  # Usa .lower() per fare una ricerca case-insensitive
+                return descrizione
+
+    def show_confirm_dialog(self, row):
         item_name = self.menu_table.item(row, 0).text()
         item_price = self.menu_table.item(row, 1).text()
+        item_descript = self.get_item_description(item_name)
 
-        dialog = ConfirmDialog(item_name, item_price)
+        dialog = ConfirmDialog(item_name, item_price, item_descript)
         if dialog.exec_() == QDialog.Accepted:
             order_details = dialog.get_order_details()
             for _ in range(order_details['quantity']):
@@ -319,7 +332,7 @@ class RestaurantApp(QMainWindow):
             total = 0.0
             for row in range(self.order_table.rowCount()):
                 item = self.order_table.item(row, 0).text()
-                price = self.order_table.item(row, 1).text().replace("$", "")
+                price = self.order_table.item(row, 1).text().replace("€", "")
                 total += float(price)
                 printer.text(f"{item}\t\t{price} EUR\n")
 
@@ -346,9 +359,9 @@ class RestaurantApp(QMainWindow):
         for row in range(self.order_table.rowCount()):
             price_item = self.order_table.item(row, 1)
             if price_item:
-                price = price_item.text().replace("$", "")
+                price = price_item.text().replace("€", "")
                 total += float(price)
-        self.total_display.setText(f"${total:.2f}")
+        self.total_display.setText(f"€{total:.2f}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
