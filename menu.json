@@ -1,0 +1,47 @@
+{
+    "cibo": [
+        {
+            "nome": "Pizza",
+            "prezzo": 8.0,
+            "descrizione": "Margherita"
+        },
+        {
+            "nome": "Hamburger",
+            "prezzo": 7.0,
+            "descrizione": ""
+        },
+        {
+            "nome": "Pasta al Pesto",
+            "prezzo": 7.0,
+            "descrizione": ""
+        },
+        {
+            "nome": "Amatriciana",
+            "prezzo": 8.0,
+            "descrizione": ""
+        },
+        {
+            "nome": "Carbonara",
+            "prezzo": 9.0,
+            "descrizione": ""
+        }
+    ],
+    "bevanda": [
+        {
+            "nome": "Coca Cola",
+            "prezzo": 3.0
+        },
+        {
+            "nome": "Acqua",
+            "prezzo": 2.0
+        },
+        {
+            "nome": "Fanta",
+            "prezzo": 3.0
+        },
+        {
+            "nome": "Sprite",
+            "prezzo": 3.0
+        }
+    ]
+}

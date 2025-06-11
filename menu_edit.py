@@ -7,14 +7,50 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtCore import Qt
 
-class RestaurantMenuApp(QMainWindow):
-    def __init__(self):
+class MenuEdit(QMainWindow):
+    def __init__(self, back_callback=None):
         super().__init__()
-
-        self.setWindowTitle("Menu Ristorante")
-        self.setGeometry(100, 100, 800, 600)
+        self.setWindowTitle("Menu")
+        self.setGeometry(100, 100, 900, 700)
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #fdf6e3;
+                color: #222;
+            }
+            QLabel {
+                color: #222;
+                font-size: 18px;
+            }
+            QLineEdit, QTextEdit, QComboBox {
+                background-color: #fdf6e3;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+            QPushButton {
+                background-color: #fff;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 12px;
+                padding: 8px;
+                font-size: 18px;
+            }
+            QPushButton:hover {
+                background-color: #fdf6e3;
+                color: #b58900;
+                border: 2px solid #b58900;
+            }
+            QListWidget {
+                background-color: #fdf6e3;
+                color: #222;
+                border: 2px solid #b58900;
+                font-size: 16px;
+            }
+        """)
 
         self.menu = self.load_menu()
+        self.back_callback = back_callback
 
         self.init_ui()
 
@@ -27,11 +63,14 @@ class RestaurantMenuApp(QMainWindow):
 
         back_button = QPushButton("  ←  ")
         back_button.setStyleSheet("font-size: 25px; padding: 10px;")
+        back_button.clicked.connect(self.handle_back)
         top_bar.addWidget(back_button, alignment=Qt.AlignLeft)
 
         # Dropdown per selezionare la categoria
         self.category_selector = QComboBox()
         self.category_selector.addItems(["Cibo", "Bevanda"])
+        self.category_selector.setMinimumWidth(200)
+        self.category_selector.view().setMinimumWidth(200)
         self.category_selector.currentTextChanged.connect(self.toggle_fields)
 
         # Campi di input
@@ -80,6 +119,11 @@ class RestaurantMenuApp(QMainWindow):
         self.setCentralWidget(container)
 
         self.toggle_fields()  # Configura i campi inizialmente
+
+    def handle_back(self):
+        if self.back_callback:
+            self.hide()
+            self.back_callback()
 
     def toggle_fields(self):
         """Abilita/disabilita i campi in base alla categoria selezionata."""
@@ -157,10 +201,4 @@ class RestaurantMenuApp(QMainWindow):
         """Salva il menu in un file JSON."""
         with open("menu.json", "w") as file:
             json.dump(self.menu, file, indent=4)
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = RestaurantMenuApp()
-    window.show()
-    sys.exit(app.exec_())
 

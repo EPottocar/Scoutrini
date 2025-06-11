@@ -15,7 +15,47 @@ class ConfirmDialog(QDialog):
     def __init__(self, item_name, item_price, item_descript):
         super().__init__()
         self.setWindowTitle("Conferma")
-        self.setGeometry(300, 200, 400, 300)
+        self.setGeometry(300, 200, 900, 600)
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #fdf6e3;
+                color: #222;
+                           
+            }
+            QSpinBox {
+                background-color: #fdf6e3;
+                color: #222;
+                border: 4px solid #b58900;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+            QLabel 
+            {
+                color: #222;
+                font-size: 18px;
+            }
+            QLineEdit, QTextEdit, QComboBox {
+                background-color: #fdf6e3;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+            QPushButton {
+                background-color: #fff;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 12px;
+                padding: 8px;
+                font-size: 18px;
+            }
+            QPushButton:hover {
+                background-color: #fdf6e3;
+                color: #b58900;
+                border: 2px solid #b58900;
+                
+            }
+        """)
 
         # Main layout
         layout = QVBoxLayout()
@@ -24,11 +64,11 @@ class ConfirmDialog(QDialog):
         # Item details
         details_layout = QHBoxLayout()
         self.item_label = QLabel(f"{item_name}")
-        self.item_label.setFont(QFont("Arial", 14, QFont.Bold))
+        self.item_label.setFont(QFont("Arial", 20, QFont.Bold))
         details_layout.addWidget(self.item_label)
 
         self.price_label = QLabel(f"{item_price}")
-        self.price_label.setFont(QFont("Arial", 14))
+        self.price_label.setFont(QFont("Arial", 16))
         details_layout.addWidget(self.price_label)
         layout.addLayout(details_layout)
 
@@ -44,7 +84,7 @@ class ConfirmDialog(QDialog):
 
         # Notes section
         notes_label = QLabel("Note:")
-        notes_label.setFont(QFont("Arial", 12))
+        notes_label.setFont(QFont("Arial", 16))
         layout.addWidget(notes_label)
 
         self.notes_field = QTextEdit()
@@ -53,7 +93,7 @@ class ConfirmDialog(QDialog):
         # Quantity section
         quantity_layout = QHBoxLayout()
         quantity_label = QLabel("Quantità:")
-        quantity_label.setFont(QFont("Arial", 12))
+        quantity_label.setFont(QFont("Arial", 16))
         quantity_layout.addWidget(quantity_label)
 
         self.quantity_spinbox = QSpinBox()
@@ -90,6 +130,36 @@ class Insert_Name_Order(QDialog):
         super().__init__()
         self.setWindowTitle("Inserisci Nome Ordine")
         self.setGeometry(300, 200, 400, 300)
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #fdf6e3;
+                color: #222;
+            }
+            QLabel {
+                color: #222;
+                font-size: 18px;
+            }
+            QLineEdit, QTextEdit, QComboBox {
+                background-color: #fdf6e3;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+            QPushButton {
+                background-color: #fff;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 12px;
+                padding: 8px;
+                font-size: 18px;
+            }
+            QPushButton:hover {
+                background-color: #fdf6e3;
+                color: #b58900;
+                border: 2px solid #b58900;
+            }
+        """)
 
         # Main layout
         layout = QVBoxLayout()
@@ -97,7 +167,7 @@ class Insert_Name_Order(QDialog):
 
         # Notes section
         notes_label = QLabel("Inserisci Nome Ordine:")
-        notes_label.setFont(QFont("Arial", 12))
+        notes_label.setFont(QFont("Arial", 16))
         layout.addWidget(notes_label)
 
         self.notes_field = QTextEdit()
@@ -124,14 +194,51 @@ class Insert_Name_Order(QDialog):
         # Method to retrieve the customer name after dialog acceptance
         return self.notes_field.toPlainText()
 
-class RestaurantApp(QMainWindow):
-    def __init__(self):
+class SchermataOrdine(QMainWindow):
+    def __init__(self, back_callback=None):
         super().__init__()
-        self.setWindowTitle("Restaurant Order and Receipt App")
+        self.setWindowTitle("Ordine")
         self.setGeometry(100, 100, 900, 600)
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #fdf6e3;
+                color: #222;
+            }
+            QLabel {
+                color: #222;
+                font-size: 18px;
+            }
+            QLineEdit, QTextEdit, QComboBox {
+                background-color: #fdf6e3;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+            QPushButton {
+                background-color: #fff;
+                color: #222;
+                border: 2px solid #b58900;
+                border-radius: 12px;
+                padding: 8px;
+                font-size: 18px;
+            }
+            QPushButton:hover {
+                background-color: #fdf6e3;
+                color: #b58900;
+                border: 2px solid #b58900;
+            }
+            QTableWidget {
+                background-color: #fdf6e3;
+                color: #222;
+                font-size: 16px;
+            }
+        """)
 
         self.menu_items = []
         self.beverage_items = []
+        self.back_callback = back_callback
+        self.order_notes = []  # Lista parallela per le note
 
         self.load_menu_data()
         self.initUI()
@@ -167,6 +274,7 @@ class RestaurantApp(QMainWindow):
 
         back_button = QPushButton("  ←  ")
         back_button.setStyleSheet("font-size: 25px; padding: 10px;")
+        back_button.clicked.connect(self.handle_back)
         top_bar.addWidget(back_button, alignment=Qt.AlignLeft)
 
         # Content layout
@@ -180,11 +288,11 @@ class RestaurantApp(QMainWindow):
         menu_frame.setLayout(menu_layout)
 
         menu_label = QLabel("Menu")
-        menu_label.setFont(QFont("Arial", 16, QFont.Bold))
+        menu_label.setFont(QFont("Arial", 18, QFont.Bold))
         menu_label.setAlignment(Qt.AlignCenter)
         menu_layout.addWidget(menu_label)
 
-        self.menu_table = QTableWidget(5, 2)
+        self.menu_table = QTableWidget(len(self.menu_items), 2)  # <-- usa la lunghezza dei cibi
         self.menu_table.setHorizontalHeaderLabels(["Cibo", "Prezzo"])
         self.menu_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.menu_table.verticalHeader().setVisible(False)
@@ -203,11 +311,11 @@ class RestaurantApp(QMainWindow):
         beverages_frame.setLayout(beverages_layout)
 
         beverages_label = QLabel("Bevande")
-        beverages_label.setFont(QFont("Arial", 16, QFont.Bold))
+        beverages_label.setFont(QFont("Arial", 18, QFont.Bold))
         beverages_label.setAlignment(Qt.AlignCenter)
         beverages_layout.addWidget(beverages_label)
 
-        self.beverages_table = QTableWidget(5, 2)
+        self.beverages_table = QTableWidget(len(self.beverage_items), 2)  # <-- usa la lunghezza delle bevande
         self.beverages_table.setHorizontalHeaderLabels(["Bevanda", "Prezzo"])
         self.beverages_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.beverages_table.verticalHeader().setVisible(False)
@@ -226,16 +334,16 @@ class RestaurantApp(QMainWindow):
         order_frame.setLayout(order_layout)
 
         order_label = QLabel("Ordine")
-        order_label.setFont(QFont("Arial", 16, QFont.Bold))
+        order_label.setFont(QFont("Arial", 18, QFont.Bold))
         order_label.setAlignment(Qt.AlignCenter)
         order_layout.addWidget(order_label)
 
         # Total display
         total_layout = QHBoxLayout()
         total_label = QLabel("Totale:")
-        total_label.setFont(QFont("Arial", 14))
+        total_label.setFont(QFont("Arial", 16))
         self.total_display = QLineEdit("€0")
-        self.total_display.setFont(QFont("Arial", 14))
+        self.total_display.setFont(QFont("Arial", 16))
         self.total_display.setReadOnly(True)
         total_layout.addWidget(total_label)
         total_layout.addWidget(self.total_display)
@@ -290,6 +398,7 @@ class RestaurantApp(QMainWindow):
                 self.order_table.insertRow(row_count)
                 self.order_table.setItem(row_count, 0, QTableWidgetItem(item_name))
                 self.order_table.setItem(row_count, 1, QTableWidgetItem(item_price))
+                self.order_notes.append(order_details['notes'])  # Salva la nota
             self.update_total()
 
     def show_insert_name(self):
@@ -306,6 +415,7 @@ class RestaurantApp(QMainWindow):
         self.order_table.insertRow(row_count)
         self.order_table.setItem(row_count, 0, QTableWidgetItem(item))
         self.order_table.setItem(row_count, 1, QTableWidgetItem(price))
+        self.order_notes.append("")  # Nessuna nota per le bevande
 
         self.update_total()
 
@@ -313,6 +423,7 @@ class RestaurantApp(QMainWindow):
         selected_row = self.order_table.currentRow()
         if selected_row != -1:
             self.order_table.removeRow(selected_row)
+            del self.order_notes[selected_row]  # Rimuovi la nota corrispondente
             self.update_total()
 
     def print_receipt(self):
@@ -321,33 +432,114 @@ class RestaurantApp(QMainWindow):
         VENDOR_ID = 0x04b8  # Modifica con il tuo idVendor
         PRODUCT_ID = 0x0851  # Modifica con il tuo idProduct
 
+        # Raccogli gli ordini
+        order_items = []
+        for row in range(self.order_table.rowCount()):
+            item = self.order_table.item(row, 0).text()
+            price = self.order_table.item(row, 1).text().replace("€", "")
+            note = self.order_notes[row] if row < len(self.order_notes) else ""
+            is_cibo = any(item == cibo[0] for cibo in self.menu_items)
+            is_bevanda = any(item == bevanda[0] for bevanda in self.beverage_items)
+            order_items.append({
+                "nome": item,
+                "prezzo": float(price),
+                "note": note,
+                "is_cibo": is_cibo,
+                "is_bevanda": is_bevanda
+            })
+
         try:
-            printer = Usb(VENDOR_ID, PRODUCT_ID)
-
-            printer.set(align='center', bold=True, font='a', width=2, height=2)
-            printer.text(f"{Customer_Name}\n")
-            printer.text("--------------------------\n")
-
-            printer.set(align='left', bold=False, font='b', width=1, height=1)
+            # --- Primo scontrino: Da tenere (tutto) ---
+            scontrino1 = []
+            scontrino1.append("Da tenere\n")
+            scontrino1.append(f"{Customer_Name}\n")
+            scontrino1.append("--------------------------\n")
             total = 0.0
-            for row in range(self.order_table.rowCount()):
-                item = self.order_table.item(row, 0).text()
-                price = self.order_table.item(row, 1).text().replace("€", "")
-                total += float(price)
-                printer.text(f"{item}\t\t{price} EUR\n")
+            for item in order_items:
+                note_str = f" ({item['note']})" if item['note'] else ""
+                line = f"{item['nome']}{note_str}"
+                if len(line) <= 40:
+                    scontrino1.append(f"{line:<40}{item['prezzo']:>8.2f} EUR\n")
+                else:
+                    scontrino1.append(f"{item['nome']}\n")
+                    if item['note']:
+                        scontrino1.append(f"{' ' * 2}{item['note']}\n")
+                    scontrino1.append(f"{'':<40}{item['prezzo']:>8.2f} EUR\n")
+                total += item['prezzo']
+            scontrino1.append("--------------------------\n")
+            scontrino1.append(f"{'Totale:':<40}{total:>8.2f} EUR\n")
+            scontrino1.append("--------------------------\n")
+            scontrino1.append("Grazie per la visita!\n")
 
-            printer.text("--------------------------\n")
-            printer.set(align='right', bold=True)
-            printer.text(f"Totale: {total:.2f} EUR\n")
+            # --- Secondo scontrino: Cucina (solo cibo) ---
+            scontrino2 = []
+            scontrino2.append("Cucina\n")
+            scontrino2.append(f"{Customer_Name}\n")
+            scontrino2.append("--------------------------\n")
+            total_cibo = 0.0
+            for item in order_items:
+                if item['is_cibo']:
+                    note_str = f" ({item['note']})" if item['note'] else ""
+                    line = f"{item['nome']}{note_str}"
+                    if len(line) <= 40:
+                        scontrino2.append(f"{line:<40}{item['prezzo']:>8.2f} EUR\n")
+                    else:
+                        scontrino2.append(f"{item['nome']}\n")
+                        if item['note']:
+                            scontrino2.append(f"{' ' * 2}{item['note']}\n")
+                        scontrino2.append(f"{'':<40}{item['prezzo']:>8.2f} EUR\n")
+                    total_cibo += item['prezzo']
+            scontrino2.append("--------------------------\n")
+            scontrino2.append(f"{'Totale:':<40}{total_cibo:>8.2f} EUR\n")
+            scontrino2.append("--------------------------\n")
 
-            printer.text("--------------------------\n")
-            printer.set(align='center', bold=False)
-            printer.text("Grazie per la visita!\n")
+            # --- Terzo scontrino: Bar (solo bevande) ---
+            scontrino3 = []
+            scontrino3.append("Bar\n")
+            scontrino3.append(f"{Customer_Name}\n")
+            scontrino3.append("--------------------------\n")
+            total_bevande = 0.0
+            for item in order_items:
+                if item['is_bevanda']:
+                    line = item['nome']
+                    scontrino3.append(f"{line:<40}{item['prezzo']:>8.2f} EUR\n")
+                    total_bevande += item['prezzo']
+            scontrino3.append("--------------------------\n")
+            scontrino3.append(f"{'Totale:':<40}{total_bevande:>8.2f} EUR\n")
+            scontrino3.append("--------------------------\n")
 
-            printer.cut()
+            # --- Stampa su stampante e terminale ---
+            for idx, scontrino in enumerate([scontrino1, scontrino2, scontrino3]):
+                # Output su terminale, separati da una riga vuota
+                print("".join(scontrino))
+                print("\n" + "="*40 + "\n")  # Separatore visivo
+
+                # Output su stampante
+                printer = Usb(VENDOR_ID, PRODUCT_ID)
+                printer.set(align='center', bold=True, font='a', width=2, height=2)
+                printer.text(scontrino[0])  # Titolo
+                printer.set(align='center', bold=False, font='a', width=1, height=1)
+                printer.text(scontrino[1])  # Nome
+                printer.text(scontrino[2])  # Linea
+                printer.set(align='left', bold=False, font='b', width=1, height=1)
+                for line in scontrino[3:-4]:
+                    printer.text(line)
+                printer.text(scontrino[-4])  # Linea
+                printer.set(align='right', bold=True)
+                printer.text(scontrino[-3])  # Totale
+                printer.text(scontrino[-2])  # Linea
+                printer.set(align='center', bold=False)
+                if len(scontrino) > 7:
+                    printer.text(scontrino[-1])  # "Grazie per la visita" solo per il primo
+                printer.cut()  # Taglia la carta tra uno scontrino e l'altro
 
         except Exception as e:
             print(f"Errore durante la stampa: {e}")
+
+        # Svuota la tabella ordine e le note dopo la stampa
+        self.order_table.setRowCount(0)
+        self.order_notes.clear()
+        self.update_total()
 
         print("Receipt printed.")  # Placeholder
 
@@ -363,8 +555,13 @@ class RestaurantApp(QMainWindow):
                 total += float(price)
         self.total_display.setText(f"€{total:.2f}")
 
+    def handle_back(self):
+        if self.back_callback:
+            self.hide()
+            self.back_callback()
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = RestaurantApp()
+    window = SchermataOrdine()
     window.show()
     sys.exit(app.exec_())

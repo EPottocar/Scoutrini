@@ -1,47 +1,91 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QMainWindow
+)
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(799, 600)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.CiboButton = QtWidgets.QPushButton(self.centralwidget)
-        self.CiboButton.setGeometry(QtCore.QRect(70, 100, 241, 101))
-        self.CiboButton.setObjectName("CiboButton")
-        self.BevandeButton = QtWidgets.QPushButton(self.centralwidget)
-        self.BevandeButton.setGeometry(QtCore.QRect(70, 220, 241, 101))
-        self.BevandeButton.setObjectName("BevandeButton")
-        self.AvvioSessioneButton = QtWidgets.QPushButton(self.centralwidget)
-        self.AvvioSessioneButton.setGeometry(QtCore.QRect(380, 100, 241, 221))
-        self.AvvioSessioneButton.setCheckable(False)
-        self.AvvioSessioneButton.setObjectName("AvvioSessioneButton")
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 799, 24))
-        self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+from menu_edit import MenuEdit
+from schermata_ordine import SchermataOrdine
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+class HomeScreen(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Scoutini - Home")
+        self.setGeometry(100, 100, 900, 700)
+        self.setStyleSheet("background-color: #fdf6e3;")  # beige chiaro
 
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.CiboButton.setText(_translate("MainWindow", "Modifiche Cibo"))
-        self.BevandeButton.setText(_translate("MainWindow", "Modifiche Bevande"))
-        self.AvvioSessioneButton.setText(_translate("MainWindow", "Avvio Sessione"))
+        self.menu_edit_window = None
+        self.ordine_window = None
 
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+
+        # Titolo
+        title = QLabel("Benvenuto nel Gestionale Scoutrini")
+        title.setFont(QFont("Arial", 20, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("color: #b58900; margin-bottom: 20px;")
+
+        # Pulsante 1 - Modifica Menu
+        btn_modifica_menu = QPushButton("Modifica Menu")
+        btn_modifica_menu.setFont(QFont("Arial", 20))
+        btn_modifica_menu.setStyleSheet(self.button_style())
+        btn_modifica_menu.clicked.connect(self.go_to_modifica_menu)
+
+        # Pulsante 2 - Crea Scontrino
+        btn_crea_scontrino = QPushButton("Crea Scontrino")
+        btn_crea_scontrino.setFont(QFont("Arial", 20))
+        btn_crea_scontrino.setStyleSheet(self.button_style())
+        btn_crea_scontrino.clicked.connect(self.go_to_crea_scontrino)
+
+        layout.addWidget(title)
+        layout.addWidget(btn_modifica_menu)
+        layout.addWidget(btn_crea_scontrino)
+        layout.setSpacing(20)
+
+        self.setLayout(layout)
+
+    def button_style(self):
+        return """
+        QPushButton {
+            background-color: #fff;
+            color: #222;
+            border: 2px solid #b58900;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 20px;
+        }
+        QPushButton:hover {
+            background-color: #fdf6e3;
+            color: #b58900;
+            border: 2px solid #b58900;
+        }
+        """
+
+    def show_home(self):
+        self.show()
+        if self.menu_edit_window:
+            self.menu_edit_window.hide()
+        if self.ordine_window:
+            self.ordine_window.hide()
+
+    def go_to_modifica_menu(self):
+        if not self.menu_edit_window:
+            self.menu_edit_window = MenuEdit(back_callback=self.show_home)
+        self.menu_edit_window.show()
+        self.hide()
+
+    def go_to_crea_scontrino(self):
+        if not self.ordine_window:
+            self.ordine_window = SchermataOrdine(back_callback=self.show_home)
+        self.ordine_window.show()
+        self.hide()
 
 if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    app = QApplication(sys.argv)
+    window = HomeScreen()
+    window.show()
     sys.exit(app.exec_())
-
