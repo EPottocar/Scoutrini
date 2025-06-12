@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 from PyQt5.QtWidgets import (
@@ -10,6 +11,13 @@ from PyQt5.QtCore import Qt
 from escpos.printer import Usb
 
 Customer_Name = None
+
+def get_menu_path():
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, "menu.json")
 
 class ConfirmDialog(QDialog):
     def __init__(self, item_name, item_price, item_descript):
@@ -245,7 +253,7 @@ class SchermataOrdine(QMainWindow):
 
     def load_menu_data(self):
         try:
-            with open("menu.json", "r") as file:
+            with open(get_menu_path(), "r") as file:
                 menu_data = json.load(file)
 
             self.menu_items = [
@@ -258,6 +266,8 @@ class SchermataOrdine(QMainWindow):
             ]
         except Exception as e:
             print(f"Errore durante il caricamento di menu.json: {e}")
+            self.menu_items = []
+            self.beverage_items = []
 
     def initUI(self):
         # Main container
@@ -429,8 +439,8 @@ class SchermataOrdine(QMainWindow):
     def print_receipt(self):
         self.show_insert_name()
 
-        VENDOR_ID = 0x04b8  # Modifica con il tuo idVendor
-        PRODUCT_ID = 0x0851  # Modifica con il tuo idProduct
+        VENDOR_ID = 0x0416 # Modifica con il tuo idVendor
+        PRODUCT_ID = 0x5011  # Modifica con il tuo idProduct
 
         # Raccogli gli ordini
         order_items = []
@@ -459,17 +469,16 @@ class SchermataOrdine(QMainWindow):
                 note_str = f" ({item['note']})" if item['note'] else ""
                 line = f"{item['nome']}{note_str}"
                 if len(line) <= 40:
-                    scontrino1.append(f"{line:<40}{item['prezzo']:>8.2f} EUR\n")
+                    scontrino1.append(f"{line:<35}{item['prezzo']:>8.2f} EUR\n")
                 else:
                     scontrino1.append(f"{item['nome']}\n")
                     if item['note']:
                         scontrino1.append(f"{' ' * 2}{item['note']}\n")
-                    scontrino1.append(f"{'':<40}{item['prezzo']:>8.2f} EUR\n")
+                    scontrino1.append(f"{'':<35}{item['prezzo']:>8.2f} EUR\n")
                 total += item['prezzo']
-            scontrino1.append("--------------------------\n")
-            scontrino1.append(f"{'Totale:':<40}{total:>8.2f} EUR\n")
-            scontrino1.append("--------------------------\n")
-            scontrino1.append("Grazie per la visita!\n")
+            scontrino1.append("-" * 43 + "\n")
+            scontrino1.append(f"{'Totale:':<35}{total:>8.2f} EUR\n")
+            scontrino1.append("-" * 43 + "\n")
 
             # --- Secondo scontrino: Cucina (solo cibo) ---
             scontrino2 = []
@@ -481,17 +490,17 @@ class SchermataOrdine(QMainWindow):
                 if item['is_cibo']:
                     note_str = f" ({item['note']})" if item['note'] else ""
                     line = f"{item['nome']}{note_str}"
-                    if len(line) <= 40:
-                        scontrino2.append(f"{line:<40}{item['prezzo']:>8.2f} EUR\n")
+                    if len(line) <= 35:
+                        scontrino2.append(f"{line:<35}{item['prezzo']:>8.2f} EUR\n")
                     else:
                         scontrino2.append(f"{item['nome']}\n")
                         if item['note']:
                             scontrino2.append(f"{' ' * 2}{item['note']}\n")
                         scontrino2.append(f"{'':<40}{item['prezzo']:>8.2f} EUR\n")
                     total_cibo += item['prezzo']
-            scontrino2.append("--------------------------\n")
-            scontrino2.append(f"{'Totale:':<40}{total_cibo:>8.2f} EUR\n")
-            scontrino2.append("--------------------------\n")
+            scontrino2.append("-" * 43 + "\n")
+            scontrino2.append(f"{'Totale:':<35}{total_cibo:>8.2f} EUR\n")
+            scontrino2.append("-" * 43 + "\n")
 
             # --- Terzo scontrino: Bar (solo bevande) ---
             scontrino3 = []
@@ -502,26 +511,25 @@ class SchermataOrdine(QMainWindow):
             for item in order_items:
                 if item['is_bevanda']:
                     line = item['nome']
-                    scontrino3.append(f"{line:<40}{item['prezzo']:>8.2f} EUR\n")
+                    scontrino3.append(f"{line:<35}{item['prezzo']:>8.2f} EUR\n")
                     total_bevande += item['prezzo']
-            scontrino3.append("--------------------------\n")
-            scontrino3.append(f"{'Totale:':<40}{total_bevande:>8.2f} EUR\n")
-            scontrino3.append("--------------------------\n")
-
+            scontrino3.append("-" * 43 + "\n")
+            scontrino3.append(f"{'Totale:':<35}{total_bevande:>8.2f} EUR\n")
+            scontrino3.append("-" * 43 + "\n")
             # --- Stampa su stampante e terminale ---
+            printer = Usb(VENDOR_ID, PRODUCT_ID)
             for idx, scontrino in enumerate([scontrino1, scontrino2, scontrino3]):
                 # Output su terminale, separati da una riga vuota
                 print("".join(scontrino))
-                print("\n" + "="*40 + "\n")  # Separatore visivo
-
+                print("\n" + "="*35 + "\n")  # Separatore visivo
+                
                 # Output su stampante
-                printer = Usb(VENDOR_ID, PRODUCT_ID)
-                printer.set(align='center', bold=True, font='a', width=2, height=2)
+                printer.set(align='center', bold=True, font='a', width=3, height=3)
                 printer.text(scontrino[0])  # Titolo
-                printer.set(align='center', bold=False, font='a', width=1, height=1)
+                printer.set(align='center', bold=False, font='a', width=2, height=2)
                 printer.text(scontrino[1])  # Nome
                 printer.text(scontrino[2])  # Linea
-                printer.set(align='left', bold=False, font='b', width=1, height=1)
+                printer.set(align='left', bold=False, font='a', width=2, height=2)
                 for line in scontrino[3:-4]:
                     printer.text(line)
                 printer.text(scontrino[-4])  # Linea
@@ -529,10 +537,11 @@ class SchermataOrdine(QMainWindow):
                 printer.text(scontrino[-3])  # Totale
                 printer.text(scontrino[-2])  # Linea
                 printer.set(align='center', bold=False)
-                if len(scontrino) > 7:
+                if idx == 0 and len(scontrino) > 7:
                     printer.text(scontrino[-1])  # "Grazie per la visita" solo per il primo
                 printer.cut()  # Taglia la carta tra uno scontrino e l'altro
-
+            printer.close()
+    
         except Exception as e:
             print(f"Errore durante la stampa: {e}")
 
@@ -542,6 +551,9 @@ class SchermataOrdine(QMainWindow):
         self.update_total()
 
         print("Receipt printed.")  # Placeholder
+
+        # Torna alla schermata home
+        self.handle_back()
 
     def go_back(self):
         print("Go back to the previous screen.")  # Placeholder functionality

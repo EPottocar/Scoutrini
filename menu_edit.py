@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 from PyQt5.QtWidgets import (
@@ -6,6 +7,15 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtCore import Qt
+
+def get_menu_path():
+    if getattr(sys, 'frozen', False):
+        # Se eseguibile PyInstaller
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # Da script
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, "menu.json")
 
 class MenuEdit(QMainWindow):
     def __init__(self, back_callback=None):
@@ -191,14 +201,16 @@ class MenuEdit(QMainWindow):
 
     def load_menu(self):
         """Carica il menu da un file JSON."""
+        menu_path = get_menu_path()
         try:
-            with open("menu.json", "r") as file:
+            with open(menu_path, "r") as file:
                 return json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             return {"cibo": [], "bevanda": []}
 
     def save_menu(self):
         """Salva il menu in un file JSON."""
-        with open("menu.json", "w") as file:
+        menu_path = get_menu_path()
+        with open(menu_path, "w") as file:
             json.dump(self.menu, file, indent=4)
 
