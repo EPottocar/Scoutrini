@@ -251,6 +251,22 @@ class SchermataOrdine(QMainWindow):
         self.load_menu_data()
         self.initUI()
 
+    def aggiorna_quantita_menu(self, order_items):
+        """Aggiorna le quantità in menu.json in base agli item dell'ordine."""
+        menu_path = get_menu_path()
+        with open(menu_path, "r", encoding="utf-8") as f:
+            menu = json.load(f)
+        conteggi = {}
+        for item in order_items:
+            nome = item["nome"]
+            conteggi[nome] = conteggi.get(nome, 0) + 1
+        for categoria in menu:
+            for item in menu[categoria]:
+                if item["nome"] in conteggi:
+                    item["quantita"] = item.get("quantita", 0) + conteggi[item["nome"]]
+        with open(menu_path, "w", encoding="utf-8") as f:
+            json.dump(menu, f, ensure_ascii=False, indent=4)
+
     def load_menu_data(self):
         try:
             with open(get_menu_path(), "r") as file:
@@ -359,6 +375,26 @@ class SchermataOrdine(QMainWindow):
         total_layout.addWidget(self.total_display)
         order_layout.addLayout(total_layout)
 
+        # --- INIZIO AGGIUNTA RESTO ---
+        payment_layout = QHBoxLayout()
+        payment_label = QLabel("Pagato:")
+        payment_label.setFont(QFont("Arial", 16))
+        self.paid_input = QLineEdit()
+        self.paid_input.setPlaceholderText("Importo pagato")
+        self.paid_input.setFixedWidth(120)
+        self.paid_input.setFont(QFont("Arial", 16))
+        self.change_label = QLabel("Resto: €0.00")
+        self.change_label.setFont(QFont("Arial", 16))
+        calc_change_btn = QPushButton("Calcola resto")
+        calc_change_btn.setFont(QFont("Arial", 16))
+        calc_change_btn.clicked.connect(self.calcola_resto)
+        payment_layout.addWidget(payment_label)
+        payment_layout.addWidget(self.paid_input)
+        payment_layout.addWidget(calc_change_btn)
+        payment_layout.addWidget(self.change_label)
+        order_layout.addLayout(payment_layout)
+        # --- FINE AGGIUNTA RESTO ---
+
         self.order_table = QTableWidget(0, 2)
         self.order_table.setHorizontalHeaderLabels(["Cibo", "Prezzo"])
         self.order_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -458,10 +494,13 @@ class SchermataOrdine(QMainWindow):
                 "is_bevanda": is_bevanda
             })
 
+        #aggiorna le quantità nel menu
+        self.aggiorna_quantita_menu(order_items)
+        
         try:
             # --- Primo scontrino: Da tenere (tutto) ---
             scontrino1 = []
-            scontrino1.append("Da tenere\n")
+            scontrino1.append("Copia cliente\n")
             scontrino1.append(f"{Customer_Name}\n")
             scontrino1.append("--------------------------\n")
             total = 0.0
@@ -504,7 +543,7 @@ class SchermataOrdine(QMainWindow):
 
             # --- Terzo scontrino: Bar (solo bevande) ---
             scontrino3 = []
-            scontrino3.append("Bar\n")
+            scontrino3.append("Baar\n")
             scontrino3.append(f"{Customer_Name}\n")
             scontrino3.append("--------------------------\n")
             total_bevande = 0.0
@@ -571,6 +610,29 @@ class SchermataOrdine(QMainWindow):
         if self.back_callback:
             self.hide()
             self.back_callback()
+
+    # --- INIZIO AGGIUNTA RESTO ---
+    def calcola_resto(self):
+        """Calcola il resto da dare al cliente."""
+        totale_str = self.total_display.text().replace("€", "").replace(",", ".")
+        try:
+            totale = float(totale_str)
+        except ValueError:
+            self.change_label.setText("Resto: €0.00")
+            return
+
+        try:
+            pagato = float(self.paid_input.text().replace(",", "."))
+        except ValueError:
+            self.change_label.setText("Resto: €0.00")
+            return
+
+        resto = pagato - totale
+        if resto < 0:
+            self.change_label.setText("Resto: €0.00")
+        else:
+            self.change_label.setText(f"Resto: €{resto:.2f}")
+    # --- FINE AGGIUNTA RESTO ---
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

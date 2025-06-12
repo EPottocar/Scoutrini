@@ -158,7 +158,7 @@ class MenuEdit(QMainWindow):
             QMessageBox.warning(self, "Errore", "Il nome del prodotto non può essere vuoto.")
             return
 
-        item = {"nome": name, "prezzo": price}
+        item = {"nome": name, "prezzo": price, "quantita": 0}
         if category == "Cibo":
             item["descrizione"] = description
 

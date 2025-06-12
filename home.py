@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt
 
 from menu_edit import MenuEdit
 from schermata_ordine import SchermataOrdine
+from resoconto import ResocontoScreen
 
 class HomeScreen(QWidget):
     def __init__(self):
@@ -17,6 +18,7 @@ class HomeScreen(QWidget):
 
         self.menu_edit_window = None
         self.ordine_window = None
+        self.resoconto_window = None
 
         self.init_ui()
 
@@ -41,9 +43,16 @@ class HomeScreen(QWidget):
         btn_crea_scontrino.setStyleSheet(self.button_style())
         btn_crea_scontrino.clicked.connect(self.go_to_crea_scontrino)
 
+        # Pulsante 3 - Resoconto Vendite
+        btn_resoconto = QPushButton("Resoconto")
+        btn_resoconto.setFont(QFont("Arial", 20))
+        btn_resoconto.setStyleSheet(self.button_style())
+        btn_resoconto.clicked.connect(self.go_to_resoconto)
+
         layout.addWidget(title)
-        layout.addWidget(btn_modifica_menu)
         layout.addWidget(btn_crea_scontrino)
+        layout.addWidget(btn_modifica_menu)
+        layout.addWidget(btn_resoconto)
         layout.setSpacing(20)
 
         self.setLayout(layout)
@@ -82,6 +91,12 @@ class HomeScreen(QWidget):
         if not self.ordine_window:
             self.ordine_window = SchermataOrdine(back_callback=self.show_home)
         self.ordine_window.show()
+        self.hide()
+
+    def go_to_resoconto(self):
+        if not self.resoconto_window:
+            self.resoconto_window = ResocontoScreen(back_callback=self.show_home)
+        self.resoconto_window.show()
         self.hide()
 
 if __name__ == "__main__":

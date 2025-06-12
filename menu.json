@@ -3,45 +3,43 @@
         {
             "nome": "Pizza",
             "prezzo": 8.0,
-            "descrizione": "Margherita"
-        },
-        {
-            "nome": "Hamburger",
-            "prezzo": 7.0,
-            "descrizione": ""
-        },
-        {
-            "nome": "Pasta al Pesto",
-            "prezzo": 7.0,
+            "quantita": 1,
             "descrizione": ""
         },
         {
             "nome": "Amatriciana",
             "prezzo": 8.0,
+            "quantita": 3,
+            "descrizione": ""
+        },
+        {
+            "nome": "Pesto Genovese",
+            "prezzo": 7.0,
+            "quantita": 1,
             "descrizione": ""
         },
         {
             "nome": "Carbonara",
-            "prezzo": 9.0,
+            "prezzo": 8.0,
+            "quantita": 1,
             "descrizione": ""
         }
     ],
     "bevanda": [
         {
             "nome": "Coca Cola",
-            "prezzo": 3.0
+            "prezzo": 4.0,
+            "quantita": 3
         },
         {
             "nome": "Acqua",
-            "prezzo": 2.0
+            "prezzo": 2.0,
+            "quantita": 2
         },
         {
             "nome": "Fanta",
-            "prezzo": 3.0
-        },
-        {
-            "nome": "Sprite",
-            "prezzo": 3.0
+            "prezzo": 4.0,
+            "quantita": 2
         }
     ]
 }
